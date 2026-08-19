@@ -2,7 +2,7 @@
 const express = require('express');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const pool = require('../config/db'); // <-- INI YANG PAKAI DB!
+const pool = require('../config/db');
 const { authenticate } = require('../middleware/auth');
 
 const router = express.Router();
@@ -21,7 +21,7 @@ router.post('/login', async (req, res, next) => {
     }
 
     const [rows] = await pool.execute(
-      `SELECT users.id, users.name, users.email, users.password, users.class_name,
+      `SELECT users.id, users.name, users.email, users.password, users.full_name,
               users.is_active, users.email_verified, users.verification_code, roles.name AS role
        FROM users
        JOIN roles ON roles.id = users.role_id
@@ -63,10 +63,9 @@ router.post('/login', async (req, res, next) => {
       token,
       user: {
         id: user.id,
-        name: user.name,
+        name: user.name || user.full_name,
         email: user.email,
-        role: user.role,
-        class_name: user.class_name
+        role: user.role
       }
     });
   } catch (error) {
@@ -77,7 +76,7 @@ router.post('/login', async (req, res, next) => {
 // POST /api/auth/register
 router.post('/register', async (req, res, next) => {
   try {
-    const { name, email, password, role = 'student', class_name } = req.body;
+    const { name, email, password, role = 'student' } = req.body;
 
     if (!name || !email || !password) {
       return res.status(400).json({ message: 'Nama, email, dan password wajib diisi.' });
@@ -99,13 +98,13 @@ router.post('/register', async (req, res, next) => {
 
     const [result] = await pool.execute(
       `INSERT INTO users 
-        (name, email, password, role_id, class_name, email_verified, is_active, verification_code)
+        (name, full_name, email, password, role_id, email_verified, is_active, verification_code)
        VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-      [name, email, hashed, roleId, class_name || null, 0, 1, verificationCode]
+      [name, name, email, hashed, roleId, 0, 1, verificationCode]
     );
 
     const [newUser] = await pool.execute(
-      `SELECT users.id, users.name, users.email, users.class_name, roles.name AS role, users.verification_code
+      `SELECT users.id, users.name, users.email, roles.name AS role, users.verification_code
        FROM users
        JOIN roles ON roles.id = users.role_id
        WHERE users.id = ?`,
