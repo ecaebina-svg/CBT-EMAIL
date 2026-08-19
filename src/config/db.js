@@ -1,9 +1,11 @@
 const mysql = require('mysql2/promise');
 
-// Buat koneksi langsung dari DATABASE_URL
-// Jika DATABASE_URL tidak ada (misal di lingkungan lokal), baru pakai variabel individual
+// Gunakan DATABASE_URL dari environment variables
+const databaseUrl = process.env.DATABASE_URL;
+
+// Jika DATABASE_URL tidak ada, gunakan konfigurasi individual (untuk lokal)
 const pool = mysql.createPool(
-  process.env.DATABASE_URL || {
+  databaseUrl || {
     host: process.env.DB_HOST || '127.0.0.1',
     port: Number(process.env.DB_PORT || 3306),
     user: process.env.DB_USERNAME || 'root',
@@ -15,5 +17,12 @@ const pool = mysql.createPool(
     timezone: '+07:00'
   }
 );
+
+console.log('✅ Database connection configured');
+if (databaseUrl) {
+  console.log('✅ Using DATABASE_URL (production mode)');
+} else {
+  console.log('⚠️ Using individual DB variables (local mode)');
+}
 
 module.exports = pool;
