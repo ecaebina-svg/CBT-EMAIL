@@ -1,0 +1,2171 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Dashboard - CBT App</title>
+  <link rel="stylesheet" href="/assets/app.css">
+  <style>
+    .verify-badge { display: inline-block; padding: 2px 10px; border-radius: 999px; font-size: 12px; font-weight: 600; }
+    .verified   { background: #dcfce7; color: #16a34a; }
+    .unverified { background: #fee2e2; color: #dc2626; }
+    .code-demo  { font-family: monospace; font-weight: 700; color: #2563eb; letter-spacing: 2px; }
+    .btn-verify { padding: 4px 10px; font-size: 12px; background: #3b82f6; color: white; border: none; border-radius: 6px; cursor: pointer; }
+    .btn-verify:hover { background: #2563eb; }
+    .section-title { font-size: 16px; font-weight: 700; color: #1e293b; margin: 20px 0 10px; border-left: 4px solid #3b82f6; padding-left: 10px; }
+    .form-row { display: flex; flex-direction: column; gap: 8px; margin-bottom: 10px; }
+    .form-row label { font-size: 13px; font-weight: 500; color: #374151; }
+    .email-note { background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px; padding: 10px 14px; font-size: 13px; color: #1d4ed8; margin-top: 10px; }
+
+    .greeting-card {
+      background: white;
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      padding: 24px 32px;
+      box-shadow: var(--shadow);
+      margin-bottom: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+    .greeting-card h2 { margin: 0; font-size: 26px; letter-spacing: -0.02em; }
+    .greeting-card .role-badge { background: var(--primary); color: white; padding: 6px 18px; border-radius: 999px; font-size: 14px; font-weight: 700; text-transform: uppercase; }
+    .greeting-card .sub-muted { color: var(--muted); margin: 2px 0 0 0; font-size: 14px; }
+
+    .last-result-box {
+      background: #f0fdf4;
+      padding: 12px 16px;
+      border-radius: 8px;
+      margin-bottom: 16px;
+      border: 1px solid #bbf7d0;
+    }
+    .last-result-box p { margin: 4px 0; }
+    .btn-hide-result { margin-top:8px; padding:4px 14px; background:#ef4444; color:white; border:none; border-radius:6px; cursor:pointer; font-size:13px; }
+    .btn-hide-result:hover { background:#dc2626; }
+
+    /* ===== MANAGEMENT SOAL & UJIAN ===== */
+    .admin-section {
+      margin-top: 32px;
+      border-top: 2px solid #e5e7eb;
+      padding-top: 28px;
+    }
+
+    .admin-section .header-admin {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .admin-section .header-admin h2 {
+      font-size: 20px;
+      font-weight: 700;
+      color: #1e293b;
+    }
+
+    .admin-badge {
+      background: #3b82f6;
+      color: white;
+      padding: 4px 16px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 4px;
+      background: #f1f5f9;
+      border-radius: 12px;
+      padding: 4px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+
+    .tab {
+      padding: 10px 24px;
+      border-radius: 10px;
+      border: none;
+      background: transparent;
+      font-weight: 500;
+      font-size: 14px;
+      color: #64748b;
+      cursor: pointer;
+      transition: 0.15s;
+    }
+
+    .tab:hover {
+      background: rgba(59, 130, 246, 0.08);
+      color: #3b82f6;
+    }
+
+    .tab.active {
+      background: white;
+      color: #1e293b;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    }
+
+    .tab-content {
+      display: none;
+      animation: fadeIn 0.3s ease;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .stat-card {
+      background: #f8fafc;
+      padding: 12px 16px;
+      border-radius: 10px;
+      border: 1px solid #e2e8f0;
+    }
+
+    .stat-card .number {
+      font-size: 22px;
+      font-weight: 700;
+      color: #0f172a;
+    }
+
+    .stat-card .label {
+      font-size: 12px;
+      color: #64748b;
+      margin-top: 2px;
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+      border-radius: 10px;
+      border: 1px solid #e2e8f0;
+      margin-bottom: 16px;
+    }
+
+    .table-wrap table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+    }
+
+    .table-wrap th {
+      background: #f8fafc;
+      color: #1e293b;
+      font-weight: 600;
+      padding: 10px 14px;
+      text-align: left;
+      border-bottom: 2px solid #e2e8f0;
+      white-space: nowrap;
+    }
+
+    .table-wrap td {
+      padding: 8px 14px;
+      border-bottom: 1px solid #f1f5f9;
+      vertical-align: middle;
+    }
+
+    .table-wrap tr:hover td {
+      background: #fafcff;
+    }
+
+    .table-wrap .empty-state {
+      text-align: center;
+      padding: 30px 20px;
+      color: #94a3b8;
+    }
+
+    /* AKSI BUTTON - LURUS KE KANAN */
+    .aksi-group {
+      display: flex;
+      gap: 6px;
+      flex-wrap: nowrap;
+      white-space: nowrap;
+    }
+
+    .form-group {
+      margin-bottom: 14px;
+    }
+
+    .form-group label {
+      display: block;
+      font-weight: 500;
+      color: #1e293b;
+      margin-bottom: 4px;
+      font-size: 14px;
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+      width: 100%;
+      padding: 10px 14px;
+      border: 1px solid #d1d5db;
+      border-radius: 10px;
+      font-size: 14px;
+      transition: 0.15s;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+      border-color: #3b82f6;
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+
+    .form-group textarea {
+      resize: vertical;
+      min-height: 50px;
+    }
+
+    .form-row-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    .form-actions {
+      display: flex;
+      gap: 12px;
+      margin-top: 16px;
+      justify-content: flex-end;
+    }
+
+    .options-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .option-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .option-item input[type="text"] {
+      flex: 1;
+      padding: 8px 12px;
+      border: 1px solid #d1d5db;
+      border-radius: 8px;
+      font-size: 14px;
+    }
+
+    .option-item .letter {
+      font-weight: 600;
+      color: #1e293b;
+      width: 24px;
+    }
+
+    .btn-sm {
+      padding: 6px 14px;
+      font-size: 12px;
+    }
+
+    .btn-warning {
+      background: #f59e0b;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      padding: 4px 10px;
+      font-size: 12px;
+    }
+
+    .btn-warning:hover {
+      background: #d97706;
+    }
+
+    .btn-danger {
+      background: #ef4444;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      padding: 4px 10px;
+      font-size: 12px;
+    }
+
+    .btn-danger:hover {
+      background: #dc2626;
+    }
+
+    .btn-success {
+      background: #22c55e;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      padding: 4px 10px;
+      font-size: 12px;
+    }
+
+    .btn-success:hover {
+      background: #16a34a;
+    }
+
+    .btn-info {
+      background: #3b82f6;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      padding: 4px 10px;
+      font-size: 12px;
+    }
+
+    .btn-info:hover {
+      background: #2563eb;
+    }
+
+    /* MODAL */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.4);
+      z-index: 1000;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+
+    .modal-overlay.active {
+      display: flex;
+    }
+
+    .modal {
+      background: white;
+      border-radius: 24px;
+      max-width: 600px;
+      width: 100%;
+      padding: 28px 32px;
+      max-height: 90vh;
+      overflow-y: auto;
+      animation: slideUp 0.3s ease;
+    }
+
+    .modal-lg {
+      max-width: 700px;
+    }
+
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .modal .close {
+      float: right;
+      background: none;
+      border: none;
+      font-size: 28px;
+      cursor: pointer;
+      color: #94a3b8;
+    }
+
+    .modal .close:hover {
+      color: #1e293b;
+    }
+
+    .modal h2 {
+      font-size: 20px;
+      color: #1e293b;
+      margin-bottom: 16px;
+    }
+
+    /* Mapel tags */
+    .mapel-tag {
+      display: inline-block;
+      background: #dbeafe;
+      color: #1d4ed8;
+      padding: 2px 12px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 500;
+      margin: 2px 4px 2px 0;
+    }
+
+    .mapel-input-group {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .mapel-input-group input {
+      flex: 1;
+      padding: 8px 14px;
+      border: 1px solid #d1d5db;
+      border-radius: 8px;
+      font-size: 14px;
+    }
+
+    .mapel-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      margin-top: 8px;
+    }
+
+    /* Print Button */
+    .btn-print {
+      background: #8b5cf6;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      padding: 8px 20px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn-print:hover {
+      background: #7c3aed;
+    }
+
+    /* Print styles */
+    @media print {
+      .no-print { display: none !important; }
+      .modal-overlay { position: static !important; display: block !important; background: white !important; }
+      .modal { box-shadow: none !important; border: 1px solid #ddd !important; }
+      .modal .close { display: none !important; }
+      .admin-section { break-inside: avoid; }
+      .table-wrap { break-inside: auto; }
+      .tab-content { display: block !important; }
+      .tabs { display: none !important; }
+      .btn-print { display: none !important; }
+    }
+
+    @media (max-width: 768px) {
+      .form-row-2 {
+        grid-template-columns: 1fr;
+      }
+      .stats-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+      .greeting-card {
+        padding: 16px 20px;
+      }
+      .aksi-group {
+        flex-wrap: wrap;
+      }
+    }
+
+    /* HASIL UJIAN CARD */
+    .result-card {
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      border-radius: 12px;
+      padding: 16px 20px;
+      margin-bottom: 12px;
+    }
+    .result-card .title {
+      font-size: 16px;
+      font-weight: 600;
+      color: #0f172a;
+    }
+    .result-card .detail {
+      font-size: 14px;
+      color: #475569;
+      margin-top: 4px;
+    }
+    .result-card .score {
+      font-size: 24px;
+      font-weight: 700;
+      color: #16a34a;
+    }
+
+    /* ===== TAMBAHAN: MANAJEMEN USER & UJIAN ===== */
+    .user-role-badge {
+      padding: 2px 12px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 500;
+    }
+    .user-role-badge.admin { background: #dbeafe; color: #1d4ed8; }
+    .user-role-badge.guru { background: #d1fae5; color: #065f46; }
+    .user-role-badge.siswa { background: #fef3c7; color: #92400e; }
+
+    .exam-status-badge {
+      padding: 2px 12px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 500;
+    }
+    .exam-status-badge.active { background: #dbeafe; color: #1d4ed8; }
+    .exam-status-badge.inactive { background: #fee2e2; color: #dc2626; }
+    .exam-status-badge.draft { background: #fef3c7; color: #92400e; }
+
+    /* Kolom Tindakan */
+    .th-tindakan { min-width: 130px; }
+    .td-tindakan { min-width: 130px; }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div>
+      <strong>CBT App</strong>
+      <span id="userInfo" class="muted"></span>
+    </div>
+    <button id="logoutButton" class="button small">Keluar</button>
+  </header>
+
+  <main class="container">
+    <div class="greeting-card" id="greetingCard">
+      <div>
+        <h2 id="greetingText">Selamat Datang, <span id="userName">Pengguna</span> 👋</h2>
+        <p class="sub-muted">Anda login sebagai <strong id="userRoleDisplay">-</strong></p>
+      </div>
+      <div style="display: flex; gap: 12px; align-items: center;">
+        <span class="role-badge" id="roleBadge">-</span>
+      </div>
+    </div>
+
+    <!-- Daftar Ujian -->
+    <section class="card">
+      <p class="eyebrow">Dashboard</p>
+      <h1>Daftar Ujian</h1>
+      <p class="muted">Siswa dapat mengerjakan ujian aktif. Guru dan admin dapat melihat ringkasan hasil.</p>
+      <div id="message" class="message hidden"></div>
+      <div id="examList" class="grid"></div>
+    </section>
+
+    <!-- Hasil Ujian -->
+    <section class="card" id="resultsSection">
+      <div class="section-title">📊 Hasil / Ringkasan</div>
+      <div id="resultsBox"></div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- MANAGEMENT SOAL & UJIAN (UNTUK ADMIN DAN GURU) -->
+    <!-- ============================================================ -->
+    <section class="card admin-section" id="managementSection" style="display:none;">
+      <div class="header-admin">
+        <h2>🔧 Management Soal & Ujian</h2>
+        <span class="admin-badge" id="roleAccessBadge">🔒 Admin</span>
+      </div>
+
+      <!-- TABS -->
+      <div class="tabs">
+        <button class="tab active" data-tab="bankSoal">📖 Bank Soal</button>
+        <button class="tab" data-tab="kelolaSoal">✏️ Kelola Soal</button>
+        <button class="tab" data-tab="kelolaUjian">📋 Kelola Ujian</button>
+        <button class="tab" data-tab="relasi">🔗 Relasi Ujian & User</button>
+      </div>
+
+      <!-- TAB 1: BANK SOAL -->
+      <div class="tab-content active" id="bankSoal">
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:16px;">
+          <div style="display:flex; gap:10px; flex-wrap:wrap;">
+            <input type="text" id="searchSoal" placeholder="Cari mapel..." style="padding:8px 14px; border:1px solid #d1d5db; border-radius:10px; font-size:14px;" oninput="renderBankSoal()" />
+            <select id="filterMapel" style="padding:8px 14px; border:1px solid #d1d5db; border-radius:10px; font-size:14px;" onchange="renderBankSoal()">
+              <option value="">Semua Mapel</option>
+            </select>
+            <select id="filterTingkat" style="padding:8px 14px; border:1px solid #d1d5db; border-radius:10px; font-size:14px;" onchange="renderBankSoal()">
+              <option value="">Semua Tingkat</option>
+              <option value="Mudah">Mudah</option>
+              <option value="Sedang">Sedang</option>
+              <option value="Sulit">Sulit</option>
+            </select>
+            <select id="filterJenis" style="padding:8px 14px; border:1px solid #d1d5db; border-radius:10px; font-size:14px;" onchange="renderBankSoal()">
+              <option value="">Semua Jenis</option>
+              <option value="Latihan">Latihan</option>
+              <option value="UTS">UTS</option>
+              <option value="UAS">UAS</option>
+              <option value="Ulangan">Ulangan</option>
+            </select>
+          </div>
+          <button class="button primary" onclick="openModal('addMapel')">+ Tambah Mapel</button>
+        </div>
+
+        <!-- Stats -->
+        <div class="stats-grid">
+          <div class="stat-card"><div class="number" id="totalSoal">0</div><div class="label">Total Soal</div></div>
+          <div class="stat-card"><div class="number" id="totalMapel">0</div><div class="label">Mata Pelajaran</div></div>
+          <div class="stat-card"><div class="number" id="totalJenis">0</div><div class="label">Jenis Ujian</div></div>
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Mata Pelajaran</th>
+                <th>Tingkat</th>
+                <th>Jenis Ujian</th>
+                <th>Jumlah Soal</th>
+                <th>Aksi</th>
+              </tr>
+            </thead>
+            <tbody id="bankSoalBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- TAB 2: KELOLA SOAL -->
+      <div class="tab-content" id="kelolaSoal">
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+          <div>
+            <h3 style="margin-bottom:12px; color:#1e293b; font-size:16px;">📝 Tambah/Edit Soal</h3>
+            <form id="formSoal" onsubmit="saveSoal(event)">
+              <div class="form-group">
+                <label>Mata Pelajaran</label>
+                <select id="inputMapel" required>
+                  <option value="">Pilih Mapel</option>
+                </select>
+                <div style="margin-top:6px;">
+                  <small style="color:#64748b;">Belum ada mapel? Tambahkan di bawah:</small>
+                  <div class="mapel-input-group" style="margin-top:4px;">
+                    <input type="text" id="newMapelInput" placeholder="Nama mapel baru..." />
+                    <button type="button" class="button primary btn-sm" onclick="tambahMapel()">+ Tambah</button>
+                  </div>
+                  <div class="mapel-list" id="mapelListTags"></div>
+                </div>
+              </div>
+              <div class="form-group">
+                <label>Tingkat Kesulitan</label>
+                <select id="inputTingkat" required>
+                  <option value="">Pilih Tingkat</option>
+                  <option value="Mudah">Mudah</option>
+                  <option value="Sedang">Sedang</option>
+                  <option value="Sulit">Sulit</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>Jenis Ujian</label>
+                <select id="inputJenis" required>
+                  <option value="">Pilih Jenis</option>
+                  <option value="Latihan">Latihan</option>
+                  <option value="UTS">UTS</option>
+                  <option value="UAS">UAS</option>
+                  <option value="Ulangan">Ulangan</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>Soal</label>
+                <textarea id="inputSoal" rows="2" placeholder="Masukkan pertanyaan..." required></textarea>
+              </div>
+              <div class="form-group">
+                <label>Pilihan Jawaban</label>
+                <div class="options-group">
+                  <div class="option-item"><span class="letter">A.</span><input type="text" id="optA" placeholder="Jawaban A" required /></div>
+                  <div class="option-item"><span class="letter">B.</span><input type="text" id="optB" placeholder="Jawaban B" required /></div>
+                  <div class="option-item"><span class="letter">C.</span><input type="text" id="optC" placeholder="Jawaban C" required /></div>
+                  <div class="option-item"><span class="letter">D.</span><input type="text" id="optD" placeholder="Jawaban D" required /></div>
+                  <div class="option-item"><span class="letter">E.</span><input type="text" id="optE" placeholder="Jawaban E (opsional)" /></div>
+                </div>
+              </div>
+              <div class="form-group">
+                <label>Kunci Jawaban</label>
+                <select id="inputKunci" required>
+                  <option value="">Pilih Kunci Jawaban</option>
+                  <option value="0">A</option><option value="1">B</option>
+                  <option value="2">C</option><option value="3">D</option>
+                  <option value="4">E</option>
+                </select>
+              </div>
+              <input type="hidden" id="editId" value="" />
+              <input type="hidden" id="editMapelTarget" value="" />
+              <div class="form-actions">
+                <button type="button" class="button secondary" onclick="resetForm()">Reset</button>
+                <button type="submit" class="button primary" id="btnSubmit">💾 Simpan Soal</button>
+              </div>
+            </form>
+          </div>
+          <div>
+            <h3 style="margin-bottom:12px; color:#1e293b; font-size:16px;">📋 Daftar Mata Pelajaran</h3>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>ID</th><th>Mata Pelajaran</th><th>Jumlah Soal</th></tr></thead>
+                <tbody id="mapelListBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 3: KELOLA UJIAN -->
+      <div class="tab-content" id="kelolaUjian">
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:16px;">
+          <h3 style="color:#1e293b; font-size:16px;">📋 Daftar Ujian</h3>
+          <button class="button primary" onclick="openModalUjian('add')">+ Tambah Ujian</button>
+        </div>
+
+        <div class="stats-grid">
+          <div class="stat-card"><div class="number" id="totalUjian">0</div><div class="label">Total Ujian</div></div>
+          <div class="stat-card"><div class="number" id="totalUjianAktif">0</div><div class="label">Aktif</div></div>
+          <div class="stat-card"><div class="number" id="totalUjianDraft">0</div><div class="label">Draft</div></div>
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Nama Ujian</th>
+                <th>Mata Pelajaran</th>
+                <th>Durasi</th>
+                <th>Jumlah Soal</th>
+                <th>Status</th>
+                <th>Aksi</th>
+              </tr>
+            </thead>
+            <tbody id="ujianListBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- TAB 4: RELASI UJIAN & USER -->
+      <div class="tab-content" id="relasi">
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:16px;">
+          <h3 style="color:#1e293b; font-size:16px;">🔗 Relasi Tabel Ujian dan User</h3>
+          <button class="btn-print no-print" onclick="printRelasi()">🖨️ Cetak</button>
+        </div>
+        
+        <div style="margin-bottom:20px;">
+          <h4 style="font-size:14px; color:#475569; margin-bottom:8px;">📋 Tabel User</h4>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>ID User</th><th>Nama</th><th>Role</th></tr></thead>
+              <tbody id="userRelasiBody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div style="margin-bottom:20px;">
+          <h4 style="font-size:14px; color:#475569; margin-bottom:8px;">📋 Tabel Ujian</h4>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>ID Ujian</th><th>Nama Ujian</th><th>Durasi</th></tr></thead>
+              <tbody id="ujianRelasiBody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div>
+          <h4 style="font-size:14px; color:#475569; margin-bottom:8px;">📋 Tabel Relasi (Nilai)</h4>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>ID User</th><th>ID Ujian</th><th>Nilai</th></tr></thead>
+              <tbody id="nilaiRelasiBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- ADMIN SECTIONS (Create User & Verifikasi) -->
+    <!-- ============================================================ -->
+    <section class="card" id="adminUserSection" style="display:none">
+      <div class="section-title">Tambah Akun Guru / Siswa</div>
+      <div class="form-row"><label>Nama</label><input id="newName" placeholder="Nama lengkap" class="input"></div>
+      <div class="form-row"><label>Email</label><input id="newEmail" placeholder="email@cbt.test" class="input"></div>
+      <div class="form-row"><label>Password</label><input id="newPassword" placeholder="Password" type="text" class="input"></div>
+      <div class="form-row">
+        <label>Role</label>
+        <select id="newRole" class="input">
+          <option value="student">Siswa</option>
+          <option value="teacher">Guru</option>
+          <option value="admin">Admin</option>
+        </select>
+      </div>
+      <div class="form-row"><label>Kelas (opsional)</label><input id="newClass" placeholder="Contoh: A" class="input"></div>
+      <button class="button primary" onclick="createUser()">Simpan Akun</button>
+      <div id="userCreateMsg"></div>
+      <div id="emailNoteBox" class="email-note" style="display:none;"></div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- STATUS VERIFIKASI EMAIL USER + KELOLA USER -->
+    <!-- ============================================================ -->
+    <section class="card" id="verificationSection" style="display:none">
+      <div class="section-title">Status Verifikasi Email User (Demo)</div>
+      <p class="muted" style="font-size:13px;margin-bottom:12px;">
+        Di sini admin dapat melihat kode verifikasi demo dan memverifikasi akun secara manual.<br>
+        Pada aplikasi nyata, kode dikirim ke email pengguna via SMTP (Mailtrap/Gmail).
+      </p>
+      <div id="verificationTable" class="table-wrap"><p class="muted">Memuat...</p></div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- MODAL TAMBAH/EDIT SOAL -->
+    <!-- ============================================================ -->
+    <div class="modal-overlay" id="modal">
+      <div class="modal">
+        <button class="close" onclick="closeModal()">&times;</button>
+        <h2 id="modalTitle">Tambah Soal</h2>
+        <form id="modalForm" onsubmit="saveModalSoal(event)">
+          <div class="form-group">
+            <label>Mata Pelajaran</label>
+            <select id="modalMapel" required><option value="">Pilih Mapel</option></select>
+          </div>
+          <div class="form-group">
+            <label>Tingkat Kesulitan</label>
+            <select id="modalTingkat" required>
+              <option value="">Pilih Tingkat</option>
+              <option value="Mudah">Mudah</option>
+              <option value="Sedang">Sedang</option>
+              <option value="Sulit">Sulit</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Jenis Ujian</label>
+            <select id="modalJenis" required>
+              <option value="">Pilih Jenis</option>
+              <option value="Latihan">Latihan</option>
+              <option value="UTS">UTS</option>
+              <option value="UAS">UAS</option>
+              <option value="Ulangan">Ulangan</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Soal</label>
+            <textarea id="modalSoal" rows="2" placeholder="Masukkan pertanyaan..." required></textarea>
+          </div>
+          <div class="form-group">
+            <label>Pilihan Jawaban</label>
+            <div class="options-group">
+              <div class="option-item"><span class="letter">A.</span><input type="text" id="modalOptA" placeholder="Jawaban A" required /></div>
+              <div class="option-item"><span class="letter">B.</span><input type="text" id="modalOptB" placeholder="Jawaban B" required /></div>
+              <div class="option-item"><span class="letter">C.</span><input type="text" id="modalOptC" placeholder="Jawaban C" required /></div>
+              <div class="option-item"><span class="letter">D.</span><input type="text" id="modalOptD" placeholder="Jawaban D" required /></div>
+              <div class="option-item"><span class="letter">E.</span><input type="text" id="modalOptE" placeholder="Jawaban E (opsional)" /></div>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Kunci Jawaban</label>
+            <select id="modalKunci" required>
+              <option value="">Pilih Kunci Jawaban</option>
+              <option value="0">A</option><option value="1">B</option>
+              <option value="2">C</option><option value="3">D</option>
+              <option value="4">E</option>
+            </select>
+          </div>
+          <input type="hidden" id="modalEditId" value="" />
+          <input type="hidden" id="modalEditMapelTarget" value="" />
+          <div class="form-actions">
+            <button type="button" class="button secondary" onclick="closeModal()">Batal</button>
+            <button type="submit" class="button primary" id="modalBtnSubmit">💾 Simpan</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- MODAL LIHAT SOAL -->
+    <!-- ============================================================ -->
+    <div class="modal-overlay" id="modalLihat">
+      <div class="modal modal-lg">
+        <button class="close" onclick="closeModalLihat()">&times;</button>
+        <h2 id="lihatTitle">📖 Detail Soal</h2>
+        <div id="lihatContent"></div>
+        <div class="form-actions">
+          <button class="button secondary" onclick="closeModalLihat()">Tutup</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- MODAL EDIT MAPEL -->
+    <!-- ============================================================ -->
+    <div class="modal-overlay" id="modalEditMapel">
+      <div class="modal modal-lg">
+        <button class="close" onclick="closeModalEditMapel()">&times;</button>
+        <h2 id="editMapelTitle">📝 Kelola Soal - <span id="editMapelNama"></span></h2>
+        <div id="editMapelContent"></div>
+        <div class="form-actions">
+          <button class="button secondary" onclick="closeModalEditMapel()">Tutup</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- MODAL UNTUK KELOLA UJIAN -->
+    <!-- ============================================================ -->
+    <div class="modal-overlay" id="modalUjian">
+      <div class="modal">
+        <button class="close" onclick="closeModalUjian()">&times;</button>
+        <h2 id="modalUjianTitle">📝 Tambah Ujian</h2>
+        <form id="formUjian" onsubmit="saveUjian(event)">
+          <input type="hidden" id="editUjianId" value="" />
+          <div class="form-group">
+            <label>Nama Ujian</label>
+            <input type="text" id="inputUjianNama" placeholder="Masukkan nama ujian..." required />
+          </div>
+          <div class="form-group">
+            <label>Mata Pelajaran</label>
+            <select id="inputUjianMapel" required>
+              <option value="">Pilih Mapel</option>
+            </select>
+          </div>
+          <div class="form-row-2">
+            <div class="form-group">
+              <label>Durasi (menit)</label>
+              <input type="number" id="inputUjianDurasi" placeholder="60" min="1" required />
+            </div>
+            <div class="form-group">
+              <label>Jumlah Soal</label>
+              <input type="number" id="inputUjianJumlah" placeholder="15" min="1" required />
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Status</label>
+            <select id="inputUjianStatus" required>
+              <option value="draft">Draft</option>
+              <option value="active">Aktif</option>
+              <option value="inactive">Tidak Aktif</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Deskripsi</label>
+            <textarea id="inputUjianDeskripsi" rows="2" placeholder="Deskripsi ujian..."></textarea>
+          </div>
+          <div class="form-actions">
+            <button type="button" class="button secondary" onclick="closeModalUjian()">Batal</button>
+            <button type="submit" class="button primary" id="btnSubmitUjian">💾 Simpan Ujian</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- MODAL UNTUK KELOLA USER (EDIT) -->
+    <!-- ============================================================ -->
+    <div class="modal-overlay" id="modalUser">
+      <div class="modal">
+        <button class="close" onclick="closeModalUser()">&times;</button>
+        <h2 id="modalUserTitle">✏️ Edit User</h2>
+        <form id="formUser" onsubmit="saveUser(event)">
+          <input type="hidden" id="editUserId" value="" />
+          <div class="form-group">
+            <label>Nama Lengkap</label>
+            <input type="text" id="inputUserNama" placeholder="Nama lengkap..." required />
+          </div>
+          <div class="form-group">
+            <label>Email</label>
+            <input type="email" id="inputUserEmail" placeholder="email@cbt.test" required />
+          </div>
+          <div class="form-group">
+            <label>Password (kosongkan jika tidak diubah)</label>
+            <input type="text" id="inputUserPassword" placeholder="Password" />
+          </div>
+          <div class="form-group">
+            <label>Role</label>
+            <select id="inputUserRole" required>
+              <option value="admin">Admin</option>
+              <option value="guru">Guru</option>
+              <option value="siswa">Siswa</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Kelas (khusus siswa)</label>
+            <input type="text" id="inputUserKelas" placeholder="Contoh: Kelas A" />
+          </div>
+          <div class="form-actions">
+            <button type="button" class="button secondary" onclick="closeModalUser()">Batal</button>
+            <button type="submit" class="button primary" id="btnSubmitUser">💾 Simpan User</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+  </main>
+
+  <script>
+    // ================================================================
+    // 1. AUTH & LOGOUT
+    // ================================================================
+    const token = localStorage.getItem('cbt_token');
+    let user = JSON.parse(localStorage.getItem('cbt_user') || 'null');
+
+    if (!token || !user) window.location.href = '/login.html';
+
+    // PERBAIKAN: Normalisasi role - 'teacher' diubah menjadi 'guru'
+    if (user.role === 'teacher') {
+      user.role = 'guru';
+    }
+
+    const headers = { Authorization: `Bearer ${token}` };
+    document.getElementById('userInfo').textContent = `— ${user.name} (${user.role})`;
+
+    const role = user.role ? user.role.toUpperCase() : 'USER';
+    const name = user.name || user.email || 'Pengguna';
+    document.getElementById('userName').textContent = name;
+    document.getElementById('userRoleDisplay').textContent = role;
+    document.getElementById('roleBadge').textContent = role;
+
+    const greetingEl = document.getElementById('greetingText');
+    const roleMap = {
+      'ADMIN': 'Selamat Datang, Admin',
+      'GURU': 'Selamat Datang, Guru',
+      'SISWA': 'Selamat Datang, Siswa'
+    };
+    const greetingPrefix = roleMap[role] || 'Selamat Datang';
+    greetingEl.innerHTML = `${greetingPrefix}, <span id="userName">${name}</span> 👋`;
+
+    function logout() {
+      localStorage.removeItem('cbt_token');
+      localStorage.removeItem('cbt_user');
+      localStorage.removeItem('cbt_last_result');
+      window.location.href = '/login.html';
+    }
+    document.getElementById('logoutButton').addEventListener('click', logout);
+
+    function showMessage(text, type = 'error') {
+      const msg = document.getElementById('message');
+      msg.className = `message ${type}`;
+      msg.textContent = text;
+    }
+
+    // ================================================================
+    // 2. LOAD EXAMS
+    // ================================================================
+    async function loadExams() {
+      try {
+        const res = await fetch('/api/exams', { headers });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.message);
+        const examList = document.getElementById('examList');
+        if (!data.exams.length) { 
+          examList.innerHTML = '<p class="muted">Belum ada ujian aktif.</p>'; 
+          return; 
+        }
+
+        let localResult = null;
+        const lsData = localStorage.getItem('cbt_last_result');
+        if (lsData) {
+          try { localResult = JSON.parse(lsData); } catch (e) {}
+        }
+
+        examList.innerHTML = data.exams.map(exam => {
+          let displayScore = exam.score;
+          let displayStatus = exam.attempt_status || 'Belum dikerjakan';
+
+          if (localResult && localResult.examId == exam.id) {
+            displayScore = localResult.score;
+            displayStatus = '✅ Selesai';
+          }
+
+          const statusText = displayStatus || 'Belum dikerjakan';
+          const scoreDisplay = (displayScore !== null && displayScore !== undefined) 
+            ? `<p>Nilai: <strong>${displayScore}</strong></p>` 
+            : '';
+
+          const btn = user.role === 'student' || user.role === 'siswa'
+            ? `<button class="button primary" onclick="startExam(${exam.id})">Kerjakan Ujian</button>`
+            : `<button class="button primary" onclick="loadExamResults(${exam.id})">Lihat Hasil</button>`;
+
+          return `<article class="exam-card">
+            <p class="eyebrow">${exam.subject_name || 'Umum'}</p>
+            <h3>${exam.title}</h3>
+            <p>${exam.description || ''}</p>
+            <p>Jumlah Soal: ${exam.total_questions || 15}</p>
+            <p>Durasi: ${exam.duration_minutes} menit</p>
+            <p>Status: ${statusText}</p>
+            ${scoreDisplay}
+            ${btn}
+          </article>`;
+        }).join('');
+      } catch (err) { 
+        showMessage('Gagal memuat ujian: ' + err.message); 
+        console.error(err);
+      }
+    }
+
+    async function startExam(examId) {
+      try {
+        const res = await fetch(`/api/exams/${examId}/start`, { method: 'POST', headers });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.message);
+        window.location.href = `/exam.html?examId=${examId}`;
+      } catch (err) { 
+        showMessage(err.message); 
+      }
+    }
+
+    // ================================================================
+    // 3. LOAD MY RESULTS
+    // ================================================================
+    function loadMyResults() {
+      const box = document.getElementById('resultsBox');
+      
+      if (user.role === 'admin') {
+        const lastResult = localStorage.getItem('cbt_last_result');
+        let hasilData = null;
+        if (lastResult) {
+          try { hasilData = JSON.parse(lastResult); } catch (e) {}
+        }
+
+        let siswaData = [];
+        if (hasilData) {
+          siswaData.push({
+            nama: "Siswa Demo",
+            email: "siswa@cbt.test",
+            kelas: "Kelas A",
+            jenisUjian: hasilData.jenis || "UTS",
+            status: hasilData.status || "selesai",
+            nilai: hasilData.score || 0
+          });
+        }
+
+        let html = '';
+        if (siswaData.length > 0) {
+          html = `
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>NAMA</th>
+                    <th>EMAIL</th>
+                    <th>KELAS</th>
+                    <th>JENIS UJIAN</th>
+                    <th>STATUS</th>
+                    <th>NILAI</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${siswaData.map(s => `
+                    <tr>
+                      <td><strong>${s.nama}</strong></td>
+                      <td>${s.email}</td>
+                      <td>${s.kelas}</td>
+                      <td><span style="background:#dbeafe; padding:2px 12px; border-radius:999px; font-size:12px;">${s.jenisUjian}</span></td>
+                      <td><span class="verify-badge ${s.status === 'selesai' ? 'verified' : 'unverified'}">${s.status}</span></td>
+                      <td><strong>${s.nilai}</strong></td>
+                    </tr>
+                  `).join('')}
+                </tbody>
+              </table>
+            </div>
+            <p class="muted" style="margin-top:8px; font-size:13px;">📌 Total siswa yang sudah mengerjakan: ${siswaData.length}</p>
+          `;
+        } else {
+          html = '<p class="muted">Belum ada siswa yang mengerjakan ujian.</p>';
+        }
+        box.innerHTML = html;
+        return;
+      }
+
+      if (user.role === 'student' || user.role === 'siswa') {
+        let html = '';
+        const lastResult = localStorage.getItem('cbt_last_result');
+        if (lastResult) {
+          try {
+            const data = JSON.parse(lastResult);
+            html += `
+              <div class="result-card">
+                <div class="title">📊 ${data.title || 'Hasil Ujian'}</div>
+                <div class="score">${data.score || 0}</div>
+                <div class="detail">✅ Benar: ${data.correct || 0} dari ${data.total || 0} soal</div>
+                <div class="detail">⏱️ Waktu: ${data.time || 'Belum tersedia'}</div>
+                <div class="detail">📅 ${data.tanggal || new Date().toLocaleDateString('id-ID')} - ${data.waktu || ''}</div>
+                <button class="btn-hide-result" onclick="localStorage.removeItem('cbt_last_result'); location.reload();">Sembunyikan</button>
+              </div>
+            `;
+          } catch (e) { console.warn('Gagal parse localStorage', e); }
+        }
+        if (!html) {
+          html = '<p class="muted">Belum ada hasil. Kerjakan ujian untuk melihat nilai.</p>';
+        }
+        box.innerHTML = html;
+        return;
+      }
+
+      if (user.role === 'guru') {
+        box.innerHTML = '<p class="muted">Klik tombol Lihat Hasil pada kartu ujian untuk melihat nilai siswa.</p>';
+        return;
+      }
+    }
+
+    async function loadExamResults(examId) {
+      try {
+        const res = await fetch(`/api/exams/${examId}/results`, { headers });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.message);
+        const box = document.getElementById('resultsBox');
+        if (!data.results.length) { 
+          box.innerHTML = '<p class="muted">Belum ada siswa yang mengerjakan.</p>'; 
+          return; 
+        }
+        box.innerHTML = `<div class="table-wrap"><table>
+          <thead><tr><th>Nama</th><th>Email</th><th>Kelas</th><th>Jenis Ujian</th><th>Status</th><th>Nilai</th></tr></thead>
+          <tbody>${data.results.map(r => `<tr><td>${r.student_name}</td><td>${r.student_email}</td><td>${r.class_name||'-'}</td><td>${r.jenis_ujian||'UTS'}</td><td>${r.status}</td><td>${r.score??'-'}</td></tr>`).join('')}</tbody>
+        </table></div>`;
+      } catch (err) { 
+        document.getElementById('resultsBox').innerHTML = `<p class="error-text">${err.message}</p>`; 
+      }
+    }
+
+    // ================================================================
+    // 4. ADMIN: CREATE USER
+    // ================================================================
+    async function createUser() {
+      const msgEl = document.getElementById('userCreateMsg');
+      const noteEl = document.getElementById('emailNoteBox');
+      msgEl.textContent = '';
+      noteEl.style.display = 'none';
+
+      const res = await fetch('/api/admin/users', {
+        method: 'POST',
+        headers: { ...headers, 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: document.getElementById('newName').value,
+          email: document.getElementById('newEmail').value,
+          password: document.getElementById('newPassword').value,
+          role: document.getElementById('newRole').value,
+          class_name: document.getElementById('newClass').value
+        })
+      });
+      const d = await res.json();
+
+      if (!res.ok) { 
+        msgEl.style.color = '#dc2626'; 
+        msgEl.textContent = d.message; 
+        return; 
+      }
+
+      msgEl.style.color = '#16a34a';
+      msgEl.textContent = d.message;
+
+      if (d.verification_code_demo) {
+        noteEl.innerHTML = `📧 ${d.email_note}<br>
+          Kode verifikasi demo: <strong class="code-demo">${d.verification_code_demo}</strong><br>
+          <small>Berikan kode ini ke pengguna agar mereka bisa verifikasi di halaman login.</small>`;
+        noteEl.style.display = 'block';
+      }
+
+      document.getElementById('newName').value = '';
+      document.getElementById('newEmail').value = '';
+      document.getElementById('newPassword').value = '';
+      document.getElementById('newClass').value = '';
+      loadVerificationTable();
+    }
+
+    // ================================================================
+    // 5. VERIFICATION TABLE + KELOLA USER (Edit, Toggle, Hapus) - DIPERBAIKI
+    // ================================================================
+    async function loadVerificationTable() {
+      const box = document.getElementById('verificationTable');
+      try {
+        const res = await fetch('/api/admin/users', { headers });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.message);
+
+        // Gabungkan data dari API dengan data lokal userData
+        const allUsers = data.users.map(u => {
+          const localUser = userData.find(ud => ud.email === u.email);
+          return {
+            ...u,
+            kelas: localUser ? localUser.kelas : '-',
+            status_local: localUser ? localUser.status : 'active',
+            localId: localUser ? localUser.id : null
+          };
+        });
+
+        box.innerHTML = `<table>
+          <thead>
+            <tr>
+              <th>Nama</th>
+              <th>Email</th>
+              <th>Role</th>
+              <th>Status</th>
+              <th>Kode Demo</th>
+              <th>Aksi</th>
+              <th class="th-tindakan">Tindakan</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${allUsers.map(u => `
+              <tr>
+                <td><strong>${u.name}</strong></td>
+                <td>${u.email}</td>
+                <td><span class="user-role-badge ${u.role}">${u.role === 'admin' ? 'Admin' : u.role === 'guru' ? 'Guru' : 'Siswa'}</span></td>
+                <td><span class="verify-badge ${u.email_verified ? 'verified' : 'unverified'}">${u.email_verified ? 'Terverifikasi' : 'Belum verifikasi'}</span></td>
+                <td>${!u.email_verified && u.verification_code ? `<span class="code-demo">${u.verification_code}</span>` : '<span class="muted">-</span>'}</td>
+                <td>
+                  ${!u.email_verified ? `<button class="btn-verify" onclick="verifyManual(${u.id})" title="Verifikasi Email">✅</button>` : '<span class="muted">-</span>'}
+                </td>
+                <td class="td-tindakan">
+                  <div class="aksi-group">
+                    <button class="btn-warning" onclick="editUserVerifikasi(${u.localId || u.id})" title="Edit User">✏️</button>
+                    <button class="btn-success" onclick="toggleUserStatus(${u.localId || u.id})" title="Toggle Status">🔄</button>
+                    ${u.id !== 1 ? `<button class="btn-danger" onclick="hapusUser(${u.localId || u.id})" title="Hapus User">🗑️</button>` : ''}
+                  </div>
+                </td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>`;
+      } catch (err) { 
+        box.innerHTML = `<p class="error-text">${err.message}</p>`; 
+      }
+    }
+
+    async function verifyManual(userId) {
+      try {
+        const res = await fetch(`/api/admin/users/${userId}/verify`, { method: 'POST', headers });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.message);
+        loadVerificationTable();
+      } catch (err) { 
+        alert(err.message); 
+      }
+    }
+
+    // ================================================================
+    // 6. DATA BANK SOAL
+    // ================================================================
+    let bankSoal = {
+      "Pemrograman": {
+        tingkat: "Mudah",
+        jenis: "Latihan",
+        soal: [
+          { id: 1, soal: "Apa itu variabel?", options: ["Tempat menyimpan data", "Fungsi", "Looping", "Array", "Objek"], kunci: 0 },
+          { id: 2, soal: "Apa itu array?", options: ["Kumpulan data", "Fungsi", "Variabel", "Looping", "Objek"], kunci: 0 }
+        ]
+      },
+      "Basis Data": {
+        tingkat: "Sedang",
+        jenis: "UTS",
+        soal: [
+          { id: 3, soal: "Jelaskan fungsi Primary Key", options: ["Unik", "Ganda", "Acak", "Berurutan", "Sama"], kunci: 0 },
+          { id: 4, soal: "Apa itu SQL?", options: ["Structured Query Language", "Simple Query Language", "System Query Logic", "Standard Query Logic", "Structured Question Language"], kunci: 0 }
+        ]
+      },
+      "Jaringan": {
+        tingkat: "Sulit",
+        jenis: "UAS",
+        soal: [
+          { id: 5, soal: "Apa fungsi routing?", options: ["Mengirim data", "Mencari jalur", "Menyimpan data", "Menampilkan", "Menghapus"], kunci: 1 }
+        ]
+      }
+    };
+    let nextId = 6;
+
+    // ================================================================
+    // 7. DATA UJIAN
+    // ================================================================
+    let ujianData = [
+      { id: 1, nama: "Ujian Dasar CBT", mapel: "Pemrograman", durasi: 20, jumlah_soal: 15, status: "active", deskripsi: "Ujian contoh untuk menguji fitur login, daftar ujian, pengerjaan soal, dan penilaian otomatis." },
+      { id: 2, nama: "Ujian Basis Data", mapel: "Basis Data", durasi: 15, jumlah_soal: 10, status: "draft", deskripsi: "Ujian untuk menguji pemahaman tentang database, SQL, dan normalisasi." },
+      { id: 3, nama: "Ujian Jaringan", mapel: "Jaringan", durasi: 20, jumlah_soal: 12, status: "inactive", deskripsi: "Ujian untuk menguji pemahaman tentang jaringan, routing, dan protokol." }
+    ];
+    let nextUjianId = 4;
+
+    // ================================================================
+    // 8. DATA USER (untuk kelola user) - DIPERBAIKI
+    // ================================================================
+    let userData = [
+      { id: 1, nama: "Admin CBT", email: "admin@cbt.test", role: "admin", kelas: "", status: "active" },
+      { id: 2, nama: "Guru Demo", email: "guru@cbt.test", role: "guru", kelas: "", status: "active" },
+      { id: 3, nama: "Siswa Demo", email: "siswa@cbt.test", role: "siswa", kelas: "Kelas A", status: "active" }
+    ];
+    let nextUserId = 4;
+
+    // DATA RELASI
+    const userRelasi = [
+      { id: 1, nama: "Andi", role: "Admin" },
+      { id: 2, nama: "Budi", role: "Mahasiswa" },
+      { id: 3, nama: "Sinta", role: "Mahasiswa" }
+    ];
+
+    const ujianRelasi = [
+      { id: 1, nama: "Pemrograman Web", durasi: "60 Menit" },
+      { id: 2, nama: "Basis Data", durasi: "90 Menit" }
+    ];
+
+    const nilaiRelasi = [
+      { id_user: 2, id_ujian: 1, nilai: 90 },
+      { id_user: 3, id_ujian: 1, nilai: 85 }
+    ];
+
+    // ================================================================
+    // 9. FUNGSI RENDER MANAGEMENT
+    // ================================================================
+    function getMapelList() {
+      return Object.keys(bankSoal);
+    }
+
+    function getTotalSoal() {
+      let total = 0;
+      for (let mapel in bankSoal) {
+        total += bankSoal[mapel].soal.length;
+      }
+      return total;
+    }
+
+    function getJenisList() {
+      const jenis = new Set();
+      for (let mapel in bankSoal) {
+        jenis.add(bankSoal[mapel].jenis);
+      }
+      return Array.from(jenis);
+    }
+
+    function renderMapelTags() {
+      const container = document.getElementById('mapelListTags');
+      container.innerHTML = getMapelList().map(m => 
+        `<span class="mapel-tag">${m}</span>`
+      ).join('');
+    }
+
+    function renderBankSoal() {
+      const search = document.getElementById('searchSoal').value.toLowerCase();
+      const filterMapel = document.getElementById('filterMapel').value;
+      const filterTingkat = document.getElementById('filterTingkat').value;
+      const filterJenis = document.getElementById('filterJenis').value;
+
+      let filtered = getMapelList().filter(mapel => {
+        const data = bankSoal[mapel];
+        const matchSearch = mapel.toLowerCase().includes(search);
+        const matchMapel = filterMapel === '' || mapel === filterMapel;
+        const matchTingkat = filterTingkat === '' || data.tingkat === filterTingkat;
+        const matchJenis = filterJenis === '' || data.jenis === filterJenis;
+        return matchSearch && matchMapel && matchTingkat && matchJenis;
+      });
+
+      const tbody = document.getElementById('bankSoalBody');
+      if (filtered.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6"><div class="empty-state">📭 Tidak ada mapel</div></td></tr>`;
+        return;
+      }
+
+      const tingkatBg = { 'Mudah': '#d1fae5', 'Sedang': '#fef3c7', 'Sulit': '#fecaca' };
+      const tingkatColor = { 'Mudah': '#065f46', 'Sedang': '#92400e', 'Sulit': '#991b1b' };
+
+      tbody.innerHTML = filtered.map((mapel, index) => {
+        const data = bankSoal[mapel];
+        return `
+          <tr>
+            <td>${index + 1}</td>
+            <td><strong>${mapel}</strong></td>
+            <td><span style="background:${tingkatBg[data.tingkat]}; color:${tingkatColor[data.tingkat]}; padding:2px 12px; border-radius:999px; font-size:12px;">${data.tingkat}</span></td>
+            <td><span style="background:#dbeafe; color:#1d4ed8; padding:2px 12px; border-radius:999px; font-size:12px;">${data.jenis}</span></td>
+            <td><strong>${data.soal.length}</strong> soal</td>
+            <td>
+              <div class="aksi-group">
+                <button class="btn-warning" onclick="editMapel('${mapel}')" title="Edit Mapel">✏️</button>
+                <button class="btn-info" onclick="lihatMapel('${mapel}')" title="Lihat Soal">👁️</button>
+                <button class="btn-danger" onclick="hapusMapel('${mapel}')" title="Hapus Mapel">🗑️</button>
+              </div>
+            </td>
+          </tr>
+        `;
+      }).join('');
+
+      document.getElementById('totalSoal').textContent = getTotalSoal();
+      document.getElementById('totalMapel').textContent = getMapelList().length;
+      document.getElementById('totalJenis').textContent = getJenisList().length;
+    }
+
+    function renderMapelList() {
+      const tbody = document.getElementById('mapelListBody');
+      const mapels = getMapelList();
+      tbody.innerHTML = mapels.map((m, i) => `
+        <tr>
+          <td>${i+1}</td>
+          <td><strong>${m}</strong></td>
+          <td>${bankSoal[m].soal.length} soal</td>
+        </tr>
+      `).join('') || `<tr><td colspan="3"><div class="empty-state">Belum ada mapel</div></td></tr>`;
+    }
+
+    // ================================================================
+    // 10. RENDER UJIAN
+    // ================================================================
+    function renderUjian() {
+      const tbody = document.getElementById('ujianListBody');
+      if (ujianData.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="7"><div class="empty-state">📭 Belum ada ujian</div></td></tr>`;
+        return;
+      }
+
+      const statusMap = {
+        'active': 'Aktif',
+        'draft': 'Draft',
+        'inactive': 'Tidak Aktif'
+      };
+      const statusClass = {
+        'active': 'exam-status-badge active',
+        'draft': 'exam-status-badge draft',
+        'inactive': 'exam-status-badge inactive'
+      };
+
+      tbody.innerHTML = ujianData.map(u => `
+        <tr>
+          <td>${u.id}</td>
+          <td><strong>${u.nama}</strong></td>
+          <td>${u.mapel}</td>
+          <td>${u.durasi} menit</td>
+          <td>${u.jumlah_soal}</td>
+          <td><span class="${statusClass[u.status]}">${statusMap[u.status]}</span></td>
+          <td>
+            <div class="aksi-group">
+              <button class="btn-warning" onclick="editUjian(${u.id})" title="Edit Ujian">✏️</button>
+              <button class="btn-info" onclick="lihatUjian(${u.id})" title="Lihat Ujian">👁️</button>
+              <button class="btn-danger" onclick="hapusUjian(${u.id})" title="Hapus Ujian">🗑️</button>
+            </div>
+          </td>
+        </tr>
+      `).join('');
+
+      document.getElementById('totalUjian').textContent = ujianData.length;
+      document.getElementById('totalUjianAktif').textContent = ujianData.filter(u => u.status === 'active').length;
+      document.getElementById('totalUjianDraft').textContent = ujianData.filter(u => u.status === 'draft').length;
+    }
+
+    // ================================================================
+    // 11. RENDER RELASI
+    // ================================================================
+    function renderRelasi() {
+      const userBody = document.getElementById('userRelasiBody');
+      userBody.innerHTML = userRelasi.map(u => `
+        <tr><td>${u.id}</td><td><strong>${u.nama}</strong></td><td>${u.role}</td></tr>
+      `).join('');
+
+      const ujianBody = document.getElementById('ujianRelasiBody');
+      ujianBody.innerHTML = ujianRelasi.map(u => `
+        <tr><td>${u.id}</td><td><strong>${u.nama}</strong></td><td>${u.durasi}</td></tr>
+      `).join('');
+
+      const nilaiBody = document.getElementById('nilaiRelasiBody');
+      nilaiBody.innerHTML = nilaiRelasi.map(n => {
+        const user = userRelasi.find(u => u.id === n.id_user);
+        const ujian = ujianRelasi.find(u => u.id === n.id_ujian);
+        return `<tr>
+          <td>${n.id_user} (${user ? user.nama : '-'})</td>
+          <td>${n.id_ujian} (${ujian ? ujian.nama : '-'})</td>
+          <td><strong>${n.nilai}</strong></td>
+        </tr>`;
+      }).join('') || `<tr><td colspan="3"><div class="empty-state">Belum ada data nilai</div></td></tr>`;
+    }
+
+    function populateSelects() {
+      const mapels = getMapelList();
+      ['inputMapel', 'modalMapel', 'filterMapel', 'inputUjianMapel'].forEach(id => {
+        const sel = document.getElementById(id);
+        if (!sel) return;
+        const current = sel.value;
+        sel.innerHTML = `<option value="">${id === 'filterMapel' ? 'Semua Mapel' : 'Pilih Mapel'}</option>` +
+          mapels.map(m => `<option value="${m}">${m}</option>`).join('');
+        if (current && mapels.includes(current)) sel.value = current;
+      });
+      renderMapelTags();
+    }
+
+    function renderAll() {
+      renderBankSoal();
+      renderMapelList();
+      renderUjian();
+      renderRelasi();
+      populateSelects();
+    }
+
+    // ================================================================
+    // 12. CRUD - MAPEL
+    // ================================================================
+    function tambahMapel() {
+      const input = document.getElementById('newMapelInput');
+      const nama = input.value.trim();
+      if (!nama) {
+        alert('Masukkan nama mapel!');
+        return;
+      }
+      if (bankSoal[nama]) {
+        alert('Mapel sudah ada!');
+        return;
+      }
+      bankSoal[nama] = {
+        tingkat: "Mudah",
+        jenis: "Latihan",
+        soal: []
+      };
+      input.value = '';
+      renderAll();
+      alert(`✅ Mapel "${nama}" berhasil ditambahkan!`);
+    }
+
+    function hapusMapel(mapel) {
+      if (confirm(`Yakin ingin menghapus mapel "${mapel}" beserta semua soalnya?`)) {
+        delete bankSoal[mapel];
+        renderAll();
+        alert(`🗑️ Mapel "${mapel}" berhasil dihapus!`);
+      }
+    }
+
+    function editMapel(mapel) {
+      const modal = document.getElementById('modalEditMapel');
+      const title = document.getElementById('editMapelNama');
+      const content = document.getElementById('editMapelContent');
+
+      title.textContent = mapel;
+      const data = bankSoal[mapel];
+
+      let soalHtml = data.soal.map((s, idx) => `
+        <div style="display:flex; justify-content:space-between; align-items:center; padding:8px 12px; background:#f8fafc; border-radius:6px; margin-bottom:6px; border-left:3px solid #3b82f6;">
+          <div style="flex:1;">
+            <strong>Soal ${idx+1}:</strong> ${s.soal}
+            <div style="font-size:12px; color:#64748b; margin-top:2px;">
+              Jawaban: ${s.options.map((o, i) => i === s.kunci ? `<strong>${String.fromCharCode(65+i)}. ${o}</strong>` : `${String.fromCharCode(65+i)}. ${o}`).join(' | ')}
+            </div>
+          </div>
+          <div class="aksi-group">
+            <button class="btn-warning btn-sm" onclick="editSoalDalamMapel('${mapel}', ${s.id})">✏️</button>
+            <button class="btn-danger btn-sm" onclick="hapusSoalDalamMapel('${mapel}', ${s.id})">🗑️</button>
+          </div>
+        </div>
+      `).join('') || '<p class="muted">Belum ada soal dalam mapel ini.</p>';
+
+      content.innerHTML = `
+        <div style="margin-bottom:16px;">
+          <div style="display:flex; gap:16px; flex-wrap:wrap; margin-bottom:12px;">
+            <div><strong>Tingkat:</strong> <span style="background:#dbeafe; padding:2px 12px; border-radius:999px;">${data.tingkat}</span></div>
+            <div><strong>Jenis:</strong> <span style="background:#dbeafe; padding:2px 12px; border-radius:999px;">${data.jenis}</span></div>
+            <div><strong>Total Soal:</strong> ${data.soal.length}</div>
+          </div>
+          <button class="button primary btn-sm" onclick="tambahSoalKeMapel('${mapel}')">+ Tambah Soal</button>
+        </div>
+        <div style="max-height:400px; overflow-y:auto;">
+          ${soalHtml}
+        </div>
+      `;
+
+      modal.classList.add('active');
+    }
+
+    function closeModalEditMapel() {
+      document.getElementById('modalEditMapel').classList.remove('active');
+      renderAll();
+    }
+
+    // ================================================================
+    // 13. CRUD - SOAL DALAM MAPEL
+    // ================================================================
+    function tambahSoalKeMapel(mapel) {
+      closeModalEditMapel();
+      document.getElementById('modalMapel').value = mapel;
+      document.getElementById('modalEditId').value = '';
+      document.getElementById('modalEditMapelTarget').value = mapel;
+      document.getElementById('modalTitle').textContent = `📝 Tambah Soal - ${mapel}`;
+      document.getElementById('modalBtnSubmit').textContent = '💾 Simpan Soal';
+      document.getElementById('modalSoal').value = '';
+      document.getElementById('modalOptA').value = '';
+      document.getElementById('modalOptB').value = '';
+      document.getElementById('modalOptC').value = '';
+      document.getElementById('modalOptD').value = '';
+      document.getElementById('modalOptE').value = '';
+      document.getElementById('modalTingkat').value = bankSoal[mapel].tingkat;
+      document.getElementById('modalJenis').value = bankSoal[mapel].jenis;
+      document.getElementById('modalKunci').value = '';
+      document.getElementById('modal').classList.add('active');
+    }
+
+    function editSoalDalamMapel(mapel, id) {
+      const data = bankSoal[mapel];
+      const soal = data.soal.find(s => s.id === id);
+      if (!soal) {
+        alert('Soal tidak ditemukan!');
+        return;
+      }
+
+      closeModalEditMapel();
+      document.getElementById('modalMapel').value = mapel;
+      document.getElementById('modalEditId').value = id;
+      document.getElementById('modalEditMapelTarget').value = mapel;
+      document.getElementById('modalTitle').textContent = `✏️ Edit Soal - ${mapel}`;
+      document.getElementById('modalBtnSubmit').textContent = '💾 Update Soal';
+      document.getElementById('modalSoal').value = soal.soal;
+      document.getElementById('modalOptA').value = soal.options[0] || '';
+      document.getElementById('modalOptB').value = soal.options[1] || '';
+      document.getElementById('modalOptC').value = soal.options[2] || '';
+      document.getElementById('modalOptD').value = soal.options[3] || '';
+      document.getElementById('modalOptE').value = soal.options[4] || '';
+      document.getElementById('modalTingkat').value = data.tingkat;
+      document.getElementById('modalJenis').value = data.jenis;
+      document.getElementById('modalKunci').value = soal.kunci;
+      document.getElementById('modal').classList.add('active');
+    }
+
+    function hapusSoalDalamMapel(mapel, id) {
+      if (confirm('Yakin ingin menghapus soal ini?')) {
+        const data = bankSoal[mapel];
+        data.soal = data.soal.filter(s => s.id !== id);
+        renderAll();
+        editMapel(mapel);
+        alert('🗑️ Soal berhasil dihapus!');
+      }
+    }
+
+    // ================================================================
+    // 14. LIHAT MAPEL
+    // ================================================================
+    function lihatMapel(mapel) {
+      const data = bankSoal[mapel];
+      if (!data) {
+        alert('Mapel tidak ditemukan!');
+        return;
+      }
+
+      const modal = document.getElementById('modalLihat');
+      const title = document.getElementById('lihatTitle');
+      const content = document.getElementById('lihatContent');
+
+      title.textContent = `📖 Detail Mapel: ${mapel}`;
+
+      let soalHtml = data.soal.map((s, idx) => {
+        const letters = ['A', 'B', 'C', 'D', 'E'];
+        const optionsHtml = s.options.map((opt, i) => `
+          <div style="padding:4px 12px; margin:2px 0; border-radius:4px; ${i === s.kunci ? 'background:#d1fae5; border-left:3px solid #16a34a;' : ''}">
+            <strong>${letters[i]}.</strong> ${opt} ${i === s.kunci ? ' ✅' : ''}
+          </div>
+        `).join('');
+        return `
+          <div style="background:#f8fafc; padding:12px 16px; border-radius:8px; margin-bottom:10px; border-left:4px solid #3b82f6;">
+            <p><strong>Soal ${idx+1}:</strong> ${s.soal}</p>
+            <div style="font-size:13px; margin-top:6px;">${optionsHtml}</div>
+          </div>
+        `;
+      }).join('') || '<p class="muted">Belum ada soal dalam mapel ini.</p>';
+
+      content.innerHTML = `
+        <div style="margin-bottom:16px;">
+          <p><strong>Tingkat:</strong> <span style="background:#dbeafe; padding:2px 12px; border-radius:999px;">${data.tingkat}</span></p>
+          <p><strong>Jenis Ujian:</strong> <span style="background:#dbeafe; padding:2px 12px; border-radius:999px;">${data.jenis}</span></p>
+          <p><strong>Total Soal:</strong> ${data.soal.length}</p>
+        </div>
+        <div style="max-height:450px; overflow-y:auto;">
+          ${soalHtml}
+        </div>
+      `;
+
+      modal.classList.add('active');
+    }
+
+    function closeModalLihat() {
+      document.getElementById('modalLihat').classList.remove('active');
+    }
+
+    // ================================================================
+    // 15. MODAL TAMBAH/EDIT SOAL
+    // ================================================================
+    function openModal(mode, data) {
+      const modal = document.getElementById('modal');
+      modal.classList.add('active');
+
+      if (mode === 'addMapel') {
+        document.getElementById('modalTitle').textContent = '📝 Tambah Mapel Baru';
+        document.getElementById('modalBtnSubmit').textContent = '💾 Simpan Mapel';
+        document.getElementById('modalEditId').value = '';
+        document.getElementById('modalEditMapelTarget').value = '';
+        document.getElementById('modalMapel').innerHTML = `<option value="">Pilih Mapel</option>`;
+        document.getElementById('modalSoal').value = '';
+        document.getElementById('modalOptA').value = '';
+        document.getElementById('modalOptB').value = '';
+        document.getElementById('modalOptC').value = '';
+        document.getElementById('modalOptD').value = '';
+        document.getElementById('modalOptE').value = '';
+        document.getElementById('modalTingkat').value = '';
+        document.getElementById('modalJenis').value = '';
+        document.getElementById('modalKunci').value = '';
+        document.querySelector('#modalForm .form-group:first-child').innerHTML = `
+          <label>Nama Mata Pelajaran</label>
+          <input type="text" id="modalNamaMapel" placeholder="Masukkan nama mapel..." required />
+        `;
+        return;
+      }
+
+      document.querySelector('#modalForm .form-group:first-child').innerHTML = `
+        <label>Mata Pelajaran</label>
+        <select id="modalMapel" required><option value="">Pilih Mapel</option></select>
+      `;
+      populateSelects();
+
+      if (mode === 'edit' && data) {
+        document.getElementById('modalTitle').textContent = '✏️ Edit Soal';
+        document.getElementById('modalBtnSubmit').textContent = '💾 Update Soal';
+        document.getElementById('modalEditId').value = data.id;
+        document.getElementById('modalEditMapelTarget').value = data.mapel;
+        document.getElementById('modalMapel').value = data.mapel;
+        document.getElementById('modalTingkat').value = data.tingkat;
+        document.getElementById('modalJenis').value = data.jenis;
+        document.getElementById('modalSoal').value = data.soal;
+        document.getElementById('modalOptA').value = data.options[0] || '';
+        document.getElementById('modalOptB').value = data.options[1] || '';
+        document.getElementById('modalOptC').value = data.options[2] || '';
+        document.getElementById('modalOptD').value = data.options[3] || '';
+        document.getElementById('modalOptE').value = data.options[4] || '';
+        document.getElementById('modalKunci').value = data.kunci;
+      } else {
+        document.getElementById('modalTitle').textContent = '📝 Tambah Soal Baru';
+        document.getElementById('modalBtnSubmit').textContent = '💾 Simpan Soal';
+        document.getElementById('modalEditId').value = '';
+        document.getElementById('modalEditMapelTarget').value = '';
+        document.getElementById('modalMapel').value = '';
+        document.getElementById('modalTingkat').value = '';
+        document.getElementById('modalJenis').value = '';
+        document.getElementById('modalSoal').value = '';
+        document.getElementById('modalOptA').value = '';
+        document.getElementById('modalOptB').value = '';
+        document.getElementById('modalOptC').value = '';
+        document.getElementById('modalOptD').value = '';
+        document.getElementById('modalOptE').value = '';
+        document.getElementById('modalKunci').value = '';
+      }
+      populateSelects();
+    }
+
+    function closeModal() {
+      document.getElementById('modal').classList.remove('active');
+    }
+
+    function saveModalSoal(e) {
+      e.preventDefault();
+      
+      const namaMapelInput = document.getElementById('modalNamaMapel');
+      if (namaMapelInput) {
+        const nama = namaMapelInput.value.trim();
+        if (!nama) {
+          alert('Masukkan nama mapel!');
+          return;
+        }
+        if (bankSoal[nama]) {
+          alert('Mapel sudah ada!');
+          return;
+        }
+        bankSoal[nama] = {
+          tingkat: "Mudah",
+          jenis: "Latihan",
+          soal: []
+        };
+        closeModal();
+        renderAll();
+        alert(`✅ Mapel "${nama}" berhasil ditambahkan!`);
+        return;
+      }
+
+      const id = document.getElementById('modalEditId').value;
+      const mapel = document.getElementById('modalMapel').value;
+      const tingkat = document.getElementById('modalTingkat').value;
+      const jenis = document.getElementById('modalJenis').value;
+      const soal = document.getElementById('modalSoal').value;
+      const options = [
+        document.getElementById('modalOptA').value,
+        document.getElementById('modalOptB').value,
+        document.getElementById('modalOptC').value,
+        document.getElementById('modalOptD').value,
+        document.getElementById('modalOptE').value
+      ].filter(o => o.trim() !== '');
+      const kunci = parseInt(document.getElementById('modalKunci').value);
+
+      if (!mapel || !tingkat || !soal || options.length < 4 || isNaN(kunci)) {
+        alert('Mohon lengkapi semua data!');
+        return;
+      }
+
+      if (!bankSoal[mapel]) {
+        bankSoal[mapel] = { tingkat, jenis, soal: [] };
+      } else {
+        bankSoal[mapel].tingkat = tingkat;
+        bankSoal[mapel].jenis = jenis;
+      }
+
+      if (id) {
+        const index = bankSoal[mapel].soal.findIndex(s => s.id === parseInt(id));
+        if (index !== -1) {
+          bankSoal[mapel].soal[index] = { id: parseInt(id), soal, options, kunci };
+        }
+      } else {
+        bankSoal[mapel].soal.push({ id: nextId++, soal, options, kunci });
+      }
+
+      closeModal();
+      renderAll();
+      alert(id ? '✅ Soal berhasil diupdate!' : '✅ Soal berhasil ditambahkan!');
+    }
+
+    // ================================================================
+    // 16. CRUD - UJIAN
+    // ================================================================
+    function openModalUjian(mode, data) {
+      const modal = document.getElementById('modalUjian');
+      modal.classList.add('active');
+
+      if (mode === 'edit' && data) {
+        document.getElementById('modalUjianTitle').textContent = '✏️ Edit Ujian';
+        document.getElementById('btnSubmitUjian').textContent = '💾 Update Ujian';
+        document.getElementById('editUjianId').value = data.id;
+        document.getElementById('inputUjianNama').value = data.nama;
+        document.getElementById('inputUjianMapel').value = data.mapel;
+        document.getElementById('inputUjianDurasi').value = data.durasi;
+        document.getElementById('inputUjianJumlah').value = data.jumlah_soal;
+        document.getElementById('inputUjianStatus').value = data.status;
+        document.getElementById('inputUjianDeskripsi').value = data.deskripsi || '';
+      } else {
+        document.getElementById('modalUjianTitle').textContent = '📝 Tambah Ujian Baru';
+        document.getElementById('btnSubmitUjian').textContent = '💾 Simpan Ujian';
+        document.getElementById('editUjianId').value = '';
+        document.getElementById('inputUjianNama').value = '';
+        document.getElementById('inputUjianMapel').value = '';
+        document.getElementById('inputUjianDurasi').value = '';
+        document.getElementById('inputUjianJumlah').value = '';
+        document.getElementById('inputUjianStatus').value = 'draft';
+        document.getElementById('inputUjianDeskripsi').value = '';
+      }
+      populateSelects();
+    }
+
+    function closeModalUjian() {
+      document.getElementById('modalUjian').classList.remove('active');
+    }
+
+    function saveUjian(e) {
+      e.preventDefault();
+      const id = document.getElementById('editUjianId').value;
+      const nama = document.getElementById('inputUjianNama').value.trim();
+      const mapel = document.getElementById('inputUjianMapel').value;
+      const durasi = parseInt(document.getElementById('inputUjianDurasi').value);
+      const jumlah_soal = parseInt(document.getElementById('inputUjianJumlah').value);
+      const status = document.getElementById('inputUjianStatus').value;
+      const deskripsi = document.getElementById('inputUjianDeskripsi').value;
+
+      if (!nama || !mapel || !durasi || !jumlah_soal) {
+        alert('Mohon lengkapi semua data!');
+        return;
+      }
+
+      if (id) {
+        const index = ujianData.findIndex(u => u.id === parseInt(id));
+        if (index !== -1) {
+          ujianData[index] = { ...ujianData[index], nama, mapel, durasi, jumlah_soal, status, deskripsi };
+        }
+      } else {
+        ujianData.push({ id: nextUjianId++, nama, mapel, durasi, jumlah_soal, status, deskripsi });
+      }
+
+      closeModalUjian();
+      renderAll();
+      alert(id ? '✅ Ujian berhasil diupdate!' : '✅ Ujian berhasil ditambahkan!');
+    }
+
+    function editUjian(id) {
+      const data = ujianData.find(u => u.id === id);
+      if (data) openModalUjian('edit', data);
+    }
+
+    function lihatUjian(id) {
+      const data = ujianData.find(u => u.id === id);
+      if (data) {
+        alert(`📋 Detail Ujian\n\nNama: ${data.nama}\nMapel: ${data.mapel}\nDurasi: ${data.durasi} menit\nJumlah Soal: ${data.jumlah_soal}\nStatus: ${data.status}\nDeskripsi: ${data.deskripsi || '-'}`);
+      }
+    }
+
+    function hapusUjian(id) {
+      if (confirm('Yakin ingin menghapus ujian ini?')) {
+        ujianData = ujianData.filter(u => u.id !== id);
+        renderAll();
+        alert('🗑️ Ujian berhasil dihapus!');
+      }
+    }
+
+    // ================================================================
+    // 17. CRUD - USER (Edit, Toggle, Hapus) - DIPERBAIKI
+    // ================================================================
+    function editUserVerifikasi(id) {
+      const data = userData.find(u => u.id === id);
+      if (!data) {
+        alert('User tidak ditemukan!');
+        return;
+      }
+      document.getElementById('modalUserTitle').textContent = '✏️ Edit User';
+      document.getElementById('btnSubmitUser').textContent = '💾 Update User';
+      document.getElementById('editUserId').value = data.id;
+      document.getElementById('inputUserNama').value = data.nama;
+      document.getElementById('inputUserEmail').value = data.email;
+      document.getElementById('inputUserPassword').value = '';
+      document.getElementById('inputUserRole').value = data.role;
+      document.getElementById('inputUserKelas').value = data.kelas || '';
+      document.getElementById('modalUser').classList.add('active');
+    }
+
+    function closeModalUser() {
+      document.getElementById('modalUser').classList.remove('active');
+    }
+
+    function saveUser(e) {
+      e.preventDefault();
+      const id = document.getElementById('editUserId').value;
+      const nama = document.getElementById('inputUserNama').value.trim();
+      const email = document.getElementById('inputUserEmail').value.trim();
+      const password = document.getElementById('inputUserPassword').value.trim();
+      const role = document.getElementById('inputUserRole').value;
+      const kelas = document.getElementById('inputUserKelas').value.trim();
+
+      if (!nama || !email) {
+        alert('Mohon lengkapi data!');
+        return;
+      }
+
+      if (id) {
+        const index = userData.findIndex(u => u.id === parseInt(id));
+        if (index !== -1) {
+          userData[index] = { ...userData[index], nama, email, role, kelas };
+          if (password) userData[index].password = password;
+        }
+      } else {
+        userData.push({ 
+          id: nextUserId++, 
+          nama, 
+          email, 
+          role, 
+          kelas, 
+          password: password || 'password123',
+          status: 'active' 
+        });
+      }
+
+      closeModalUser();
+      loadVerificationTable();
+      renderAll();
+      alert(id ? '✅ User berhasil diupdate!' : '✅ User berhasil ditambahkan!');
+    }
+
+    function hapusUser(id) {
+      if (id === 1) {
+        alert('❌ Tidak bisa menghapus admin utama!');
+        return;
+      }
+      if (confirm('Yakin ingin menghapus user ini?')) {
+        userData = userData.filter(u => u.id !== id);
+        loadVerificationTable();
+        renderAll();
+        alert('🗑️ User berhasil dihapus!');
+      }
+    }
+
+    function toggleUserStatus(id) {
+      const index = userData.findIndex(u => u.id === id);
+      if (index !== -1) {
+        userData[index].status = userData[index].status === 'active' ? 'inactive' : 'active';
+        loadVerificationTable();
+        renderAll();
+        alert(`🔄 Status user berhasil diubah menjadi ${userData[index].status === 'active' ? 'Aktif' : 'Nonaktif'}`);
+      }
+    }
+
+    // ================================================================
+    // 18. PRINT RELASI
+    // ================================================================
+    function printRelasi() {
+      window.print();
+    }
+
+    // ================================================================
+    // 19. TABS
+    // ================================================================
+    document.querySelectorAll('.tab').forEach(tab => {
+      tab.addEventListener('click', function() {
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+        this.classList.add('active');
+        document.getElementById(this.dataset.tab).classList.add('active');
+      });
+    });
+
+    // ================================================================
+    // 20. INIT
+    // ================================================================
+    loadExams();
+    loadMyResults();
+
+    // ================================================================
+    // TAMPILKAN MANAGEMENT SECTION UNTUK ADMIN DAN GURU
+    // ================================================================
+    console.log('🔍 User role:', user.role);
+    
+    // Cek apakah user adalah admin atau guru
+    if (user.role === 'admin' || user.role === 'guru' || user.role === 'teacher') {
+      document.getElementById('managementSection').style.display = 'block';
+      const badge = document.getElementById('roleAccessBadge');
+      if (user.role === 'admin') {
+        badge.textContent = '🔒 Admin';
+      } else {
+        badge.textContent = '🔓 Guru';
+      }
+      renderAll();
+      console.log('✅ Management section ditampilkan untuk role:', user.role);
+    } else {
+      console.log('❌ Management section tidak ditampilkan untuk role:', user.role);
+    }
+
+    // Tampilkan admin section hanya untuk admin
+    if (user.role === 'admin') {
+      document.getElementById('adminUserSection').style.display = 'block';
+      document.getElementById('verificationSection').style.display = 'block';
+      loadVerificationTable();
+    }
+
+    // Close modal on overlay click
+    document.getElementById('modal').addEventListener('click', function(e) {
+      if (e.target === this) closeModal();
+    });
+    document.getElementById('modalLihat').addEventListener('click', function(e) {
+      if (e.target === this) closeModalLihat();
+    });
+    document.getElementById('modalEditMapel').addEventListener('click', function(e) {
+      if (e.target === this) closeModalEditMapel();
+    });
+    document.getElementById('modalUjian').addEventListener('click', function(e) {
+      if (e.target === this) closeModalUjian();
+    });
+    document.getElementById('modalUser').addEventListener('click', function(e) {
+      if (e.target === this) closeModalUser();
+    });
+
+    console.log('✅ Dashboard loaded!');
+    console.log('👤 Role:', user.role);
+    console.log('📚 Total Soal:', getTotalSoal());
+    console.log('📋 Mapel:', getMapelList());
+    console.log('📋 Ujian:', ujianData.length);
+    console.log('👥 User:', userData.length);
+
+    // ================================================================
+    // 21. LISTENER UNTUK HASIL UJIAN
+    // ================================================================
+    window.addEventListener('storage', function(e) {
+      if (e.key === 'cbt_last_result') {
+        loadMyResults();
+        loadExams();
+      }
+    });
+
+    setInterval(function() {
+      const current = localStorage.getItem('cbt_last_result');
+      if (current !== window._lastResultCheck) {
+        window._lastResultCheck = current;
+        loadMyResults();
+        loadExams();
+      }
+    }, 2000);
+  </script>
+</body>
+</html>

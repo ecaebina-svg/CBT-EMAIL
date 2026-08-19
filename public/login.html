@@ -1,0 +1,220 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Login - CBT App</title>
+  <link rel="stylesheet" href="/assets/app.css">
+  <style>
+    .verify-link { font-size: 13px; color: #3b82f6; cursor: pointer; text-align: center; margin-top: 12px; display: block; }
+    .verify-link:hover { text-decoration: underline; }
+    #verifySection { display: none; }
+    .code-hint { background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px; padding: 10px 14px; font-size: 13px; color: #1d4ed8; margin-bottom: 12px; }
+    .demo-box p { margin: 4px 0; }
+  </style>
+</head>
+<body>
+  <main class="center-page">
+    <section class="card login-card" id="loginSection">
+      <p class="eyebrow">CBT App</p>
+      <h1>Login</h1>
+      <p class="muted">
+        Masukkan email dan password. <br>
+        Jika email baru, akun akan dibuat dan Anda akan diarahkan ke verifikasi.
+      </p>
+
+      <form id="loginForm" class="form">
+        <label>Email</label>
+        <input id="email" type="email" placeholder="email@cbt.test" required>
+        <label>Password</label>
+        <input id="password" type="password" placeholder="password123" required>
+        <button class="button primary full" type="submit">Masuk</button>
+      </form>
+
+      <div id="loginMessage" class="message hidden"></div>
+      <a class="verify-link" onclick="showVerify()">Verifikasi email →</a>
+
+      <div class="demo-box">
+        <strong>Akun demo</strong>
+        <p>Admin: admin@cbt.test</p>
+        <p>Guru: guru@cbt.test</p>
+        <p>Siswa: siswa@cbt.test</p>
+        <p>Password: <strong>password123</strong></p>
+        <p style="color:#3b82f6;font-size:13px;margin-top:6px;">✨ Coba email baru, nanti harus verifikasi!</p>
+      </div>
+    </section>
+
+    <!-- VERIFIKASI -->
+    <section class="card login-card" id="verifySection" style="display:none;">
+      <p class="eyebrow">CBT App</p>
+      <h1>Verifikasi Email</h1>
+      <p class="muted">Masukkan kode verifikasi 8 digit yang dikirim.</p>
+      <div class="code-hint" id="codeHint" style="display:none;">
+        💡 Kode demo: <strong id="codeHintValue"></strong>
+      </div>
+      <form id="verifyForm" class="form">
+        <label>Email</label>
+        <input id="verifyEmail" type="email" readonly style="background:#f3f4f6;">
+        <label>Kode Verifikasi</label>
+        <input id="verifyCode" type="text" placeholder="12345678" maxlength="8" required>
+        <button class="button primary full" type="submit">Verifikasi</button>
+      </form>
+      <div id="verifyMessage" class="message hidden"></div>
+      <a class="verify-link" onclick="hideVerify()">← Kembali ke login</a>
+    </section>
+  </main>
+
+  <script>
+    const DEMO_CODES = {
+      'guru@cbt.test': '123456',       // contoh 6 digit, bisa diubah
+      'siswa@cbt.test': '654321'
+    };
+
+    let pendingEmail = '';
+
+    function showVerify(email = '') {
+      document.getElementById('loginSection').style.display = 'none';
+      document.getElementById('verifySection').style.display = 'block';
+      if (email) {
+        document.getElementById('verifyEmail').value = email;
+        pendingEmail = email;
+      }
+      const val = email.trim().toLowerCase();
+      const hint = document.getElementById('codeHint');
+      const hintVal = document.getElementById('codeHintValue');
+      if (DEMO_CODES[val]) {
+        hintVal.textContent = DEMO_CODES[val];
+        hint.style.display = 'block';
+      } else {
+        hint.style.display = 'none';
+      }
+    }
+
+    function hideVerify() {
+      document.getElementById('loginSection').style.display = 'block';
+      document.getElementById('verifySection').style.display = 'none';
+      document.getElementById('verifyMessage').className = 'message hidden';
+    }
+
+    // ===== LOGIN + AUTO REGISTER =====
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const msg = document.getElementById('loginMessage');
+      msg.className = 'message hidden';
+
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value;
+
+      if (!email || !password) {
+        msg.className = 'message error';
+        msg.textContent = 'Email dan password wajib diisi.';
+        return;
+      }
+
+      try {
+        let res = await fetch('/api/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password })
+        });
+        let data = await res.json();
+
+        if (res.ok) {
+          localStorage.setItem('cbt_token', data.token);
+          localStorage.setItem('cbt_user', JSON.stringify(data.user));
+          window.location.href = '/dashboard.html';
+          return;
+        }
+
+        if (res.status === 403 && data.needs_verification) {
+          msg.className = 'message error';
+          msg.textContent = 'Akun belum diverifikasi. Silakan verifikasi email.';
+          const link = document.createElement('span');
+          link.style.cssText = 'display:block;margin-top:8px;cursor:pointer;text-decoration:underline;color:#2563eb;';
+          link.textContent = '→ Klik di sini untuk verifikasi';
+          link.onclick = () => showVerify(data.email || email);
+          msg.appendChild(link);
+          return;
+        }
+
+        if (res.status === 401) {
+          const name = email.split('@')[0] || 'User';
+          const regRes = await fetch('/api/auth/register', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name, email, password, role: 'student', class_name: '' })
+          });
+          const regData = await regRes.json();
+
+          if (regRes.ok) {
+            msg.className = 'message success';
+            msg.textContent = 'Akun berhasil dibuat. Silakan verifikasi email.';
+            if (regData.verification_code_demo) {
+              const hint = document.createElement('div');
+              hint.style.cssText = 'background:#fef3c7;padding:8px;border-radius:6px;margin-top:8px;font-size:14px;';
+              hint.textContent = `📧 Kode verifikasi 8 digit: ${regData.verification_code_demo}`;
+              msg.appendChild(hint);
+            }
+            const link = document.createElement('span');
+            link.style.cssText = 'display:block;margin-top:8px;cursor:pointer;text-decoration:underline;color:#2563eb;';
+            link.textContent = '→ Klik di sini untuk verifikasi';
+            link.onclick = () => showVerify(email);
+            msg.appendChild(link);
+          } else {
+            msg.className = 'message error';
+            msg.textContent = regData.message || 'Gagal membuat akun.';
+          }
+        } else {
+          msg.className = 'message error';
+          msg.textContent = data.message || 'Terjadi kesalahan.';
+        }
+      } catch (err) {
+        console.error(err);
+        msg.className = 'message error';
+        msg.textContent = 'Tidak dapat terhubung ke server.';
+      }
+    });
+
+    // ===== VERIFIKASI =====
+    document.getElementById('verifyForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const msg = document.getElementById('verifyMessage');
+      msg.className = 'message hidden';
+
+      const email = document.getElementById('verifyEmail').value.trim();
+      const code = document.getElementById('verifyCode').value.trim();
+
+      try {
+        const res = await fetch('/api/auth/verify-email', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, code })
+        });
+        const data = await res.json();
+        if (!res.ok) {
+          msg.className = 'message error';
+          msg.textContent = data.message;
+          return;
+        }
+        msg.className = 'message success';
+        msg.textContent = data.message + ' Silakan login.';
+        setTimeout(() => {
+          hideVerify();
+          document.getElementById('loginMessage').className = 'message hidden';
+        }, 2000);
+      } catch (err) {
+        msg.className = 'message error';
+        msg.textContent = 'Tidak dapat terhubung ke server.';
+      }
+    });
+
+    (function() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const vEmail = urlParams.get('verify');
+      if (vEmail) {
+        showVerify(vEmail);
+      }
+    })();
+  </script>
+</body>
+</html>
