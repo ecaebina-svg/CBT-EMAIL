@@ -1,40 +1,29 @@
-require('dotenv').config();
-
+const mysql = require('mysql2/promise');
 const fs = require('fs');
 const path = require('path');
-const mysql = require('mysql2/promise');
+const bcrypt = require('bcryptjs');
+require('dotenv').config();
 
-function quoteIdentifier(identifier) {
-  return `\`${String(identifier).replace(/`/g, '``')}\``;
-}
+// Gunakan DATABASE_URL atau hardcode ke TiDB Cloud
+const databaseUrl = process.env.DATABASE_URL;
 
-async function main() {
-  const databaseName = process.env.DB_DATABASE || 'cbt_db';
+const pool = mysql.createPool(
+  databaseUrl || {
+    host: 'gateway01.ap-southeast-1.prod.aws.tidbcloud.com',
+    port: 4000,
+    user: '3JNDCKCMvpbBwcf.root',
+    password: 'MmdryOnJ4JxVJMXC',
+    database: 'Email_cbt_ebina',
+    ssl: { rejectUnauthorized: true },
+    waitForConnections: true,
+    connectionLimit: 10,
+    queueLimit: 0,
+    timezone: '+07:00'
+  }
+);
 
-  const connection = await mysql.createConnection({
-    host: process.env.DB_HOST || '127.0.0.1',
-    port: Number(process.env.DB_PORT || 3306),
-    user: process.env.DB_USERNAME || 'root',
-    password: process.env.DB_PASSWORD || '',
-    multipleStatements: true
-  });
+console.log('✅ setup-db.js - Connected to TiDB Cloud');
+console.log('   Host: gateway01.ap-southeast-1.prod.aws.tidbcloud.com');
+console.log('   Database: Email_cbt_ebina');
 
-  await connection.query(
-    `CREATE DATABASE IF NOT EXISTS ${quoteIdentifier(databaseName)} CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci`
-  );
-
-  await connection.changeUser({ database: databaseName });
-
-  const schemaPath = path.join(__dirname, '..', 'database', 'schema.sql');
-  const schemaSql = fs.readFileSync(schemaPath, 'utf8');
-
-  await connection.query(schemaSql);
-  await connection.end();
-
-  console.log(`Database ${databaseName} berhasil dibuat dan schema berhasil dijalankan.`);
-}
-
-main().catch((error) => {
-  console.error('Gagal setup database:', error.message);
-  process.exit(1);
-});
+// ... lanjutkan kode setup-db.js yang sudah ada ...
