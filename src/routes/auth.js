@@ -76,7 +76,8 @@ router.post('/login', async (req, res, next) => {
 // POST /api/auth/register
 router.post('/register', async (req, res, next) => {
   try {
-    const { name, email, password, role = 'student' } = req.body;
+    // PERBAIKAN: ubah 'student' menjadi 'siswa' (sesuai database)
+    const { name, email, password, role = 'siswa', class_name } = req.body;
 
     if (!name || !email || !password) {
       return res.status(400).json({ message: 'Nama, email, dan password wajib diisi.' });
@@ -98,9 +99,9 @@ router.post('/register', async (req, res, next) => {
 
     const [result] = await pool.execute(
       `INSERT INTO users 
-        (name, full_name, email, password, role_id, email_verified, is_active, verification_code)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-      [name, name, email, hashed, roleId, 0, 1, verificationCode]
+        (name, full_name, email, password, role_id, class_name, email_verified, is_active, verification_code)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [name, name, email, hashed, roleId, class_name || null, 0, 1, verificationCode]
     );
 
     const [newUser] = await pool.execute(
