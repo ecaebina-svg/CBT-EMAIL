@@ -2,21 +2,17 @@
 const express = require('express');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const pool = require('../config/db');
+const pool = require('../config/db'); // <-- INI YANG PAKAI DB!
 const { authenticate } = require('../middleware/auth');
 
 const router = express.Router();
 
-// -------------------------------------------------------
 // Helper: generate kode verifikasi 8 digit
-// -------------------------------------------------------
 function generateVerificationCode() {
-  return Math.floor(10000000 + Math.random() * 90000000).toString(); // 8 digit
+  return Math.floor(10000000 + Math.random() * 90000000).toString();
 }
 
-// -------------------------------------------------------
 // POST /api/auth/login
-// -------------------------------------------------------
 router.post('/login', async (req, res, next) => {
   try {
     const { email, password } = req.body;
@@ -78,9 +74,7 @@ router.post('/login', async (req, res, next) => {
   }
 });
 
-// -------------------------------------------------------
-// POST /api/auth/register – langsung buat akun (email_verified=0)
-// -------------------------------------------------------
+// POST /api/auth/register
 router.post('/register', async (req, res, next) => {
   try {
     const { name, email, password, role = 'student', class_name } = req.body;
@@ -101,7 +95,7 @@ router.post('/register', async (req, res, next) => {
     const roleId = roleRows[0].id;
 
     const hashed = await bcrypt.hash(password, 10);
-    const verificationCode = generateVerificationCode(); // 8 digit
+    const verificationCode = generateVerificationCode();
 
     const [result] = await pool.execute(
       `INSERT INTO users 
@@ -121,16 +115,14 @@ router.post('/register', async (req, res, next) => {
     res.status(201).json({
       message: 'Akun berhasil dibuat. Silakan verifikasi email dengan kode.',
       user: newUser[0],
-      verification_code_demo: verificationCode // tampilkan di response
+      verification_code_demo: verificationCode
     });
   } catch (error) {
     next(error);
   }
 });
 
-// -------------------------------------------------------
 // POST /api/auth/verify-email
-// -------------------------------------------------------
 router.post('/verify-email', async (req, res, next) => {
   try {
     const { email, code } = req.body;
@@ -167,9 +159,7 @@ router.post('/verify-email', async (req, res, next) => {
   }
 });
 
-// -------------------------------------------------------
 // GET /api/auth/me
-// -------------------------------------------------------
 router.get('/me', authenticate, async (req, res) => {
   res.json({ user: req.user });
 });
